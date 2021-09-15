@@ -1,0 +1,89 @@
+# install metric server for HPA
+
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
+
+# increase load as per kubernetes documentation
+
+kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+
+
+#increase load as per vedio
+kubectl run --generator-run-pod/v1 -it --rm load-generator --image=busybox /bin/sh
+
+when true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
+# to log into pod cassandra
+kubectl exec -it cassandra -- sh
+
+
+
+
+#VPA
+
+install metric server
+
+kubectl apply -f vpa.yaml
+
+#you will get cpu and memory usage
+
+kubectl top pod podname
+
+#to see the recommendations of cpu and memory
+
+kubectl describe vpa
+
+#goldilocks
+
+git clone https://github.com/FairwindsOps/goldilocks
+
+kubectl create namespace nsname
+
+kubectl -n goldilocks apply -f hacks/manifests/controller
+
+kubectl -n goldilocks apply -f hacks/manifests/dashboard
+
+kubectl label ns goldilocks goldilocks.fairwinds/enabled=true
+
+kubectl -n goldilocks port-forward svc/gpldilocks-dashboard 8080:80
+
+
+#creating cluster with autoscaling group
+
+eksctl create cluster --name <clustername> --version 1.15 --node-type t3.micro --nodes 2 --asg-access
+
+#Deploy the Cluster Autoscaler
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/autoscaler/master/cluster-autoscaler/cloudprovider/aws/examples/cluster-autoscaler-autodiscover.yaml
+
+kubectl patch deployment cluster-autoscaler \
+  -n kube-system \
+  -p '{"spec":{"template":{"metadata":{"annotations":{"cluster-autoscaler.kubernetes.io/safe-to-evict": "false"}}}}}'
+
+  #edit the deployment
+
+  kubectl -n kube-system edit deployment.apps/cluster-autoscaler
+
+#edit the below content in the yaml file
+  spec:
+      containers:
+      - command:
+        - ./cluster-autoscaler
+        - --v=4
+        - --stderrthreshold=info
+        - --cloud-provider=aws
+        - --skip-nodes-with-local-storage=false
+        - --expander=least-waste
+        - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/<YOUR CLUSTER NAME>
+        - --balance-similar-node-groups
+        - --skip-nodes-with-system-pods=false
+
+
+
+
+        kubectl set image deployment cluster-autoscaler \
+  -n kube-system \
+  cluster-autoscaler=k8s.gcr.io/autoscaling/cluster-autoscaler:v<1.21.0>
+
+
+  you can create deployments using deployment files present in hpa.yaml it will spin up the nodes based on cpu request in the deployment
+
+  if their are more replicas then autosaling group maximun count increases means nodes are scaling.

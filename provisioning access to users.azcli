@@ -1,0 +1,35 @@
+#providing admin access to the user
+
+kubectl edit -n kube-system configmap/aws-auth
+
+#edit below fields in aws-auth fields with the new user details
+ mapUsers: |
+    - userarn: <arn:aws:iam::111122223333:user/admin>
+      username: <admin>
+      groups:
+        - system:masters
+
+#to know the details of current user
+
+aws sts get-caller-identity
+
+#to login into aws by using access key and secrete access key 
+
+aws configure
+
+
+#providing role based access to the user
+
+kubectl apply -f user-rolebinding.yaml
+
+#edit the configmap with developeruser details
+
+mapUsers: |
+    - userarn: <arn:aws:iam::111122223333:user/admin>
+      username: <admin>
+      groups:
+        -pod-reader 
+
+
+
+

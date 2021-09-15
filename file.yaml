@@ -1,0 +1,17 @@
+#creates a cluster named basic-cluster in eu-north-1 with ng-1 node group and ng-2 managed nodegroup 
+
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: basic-cluster
+  region: eu-north-1
+
+nodeGroups:
+  - name: ng-1
+    instanceType: m5.large
+    desiredCapacity: 10
+managednodeGroups:
+  - name: ng-2
+    instanceType: m5.large
+    desiredCapacity: 10
