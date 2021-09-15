@@ -28,7 +28,7 @@ mapUsers: |
     - userarn: <arn:aws:iam::111122223333:user/admin>
       username: <admin>
       groups:
-        -pod-reader 
+        - deployment-role 
 
 
 
